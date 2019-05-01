@@ -10,6 +10,12 @@ web directory for frontend and backend development
 # Preliminary
 **Notice:** *All commands should be executed under project root directory*
 
+* Install supervisor
+
+  ```
+  npm install supervisor -g
+  ```
+
 * Install truffle
 
 	```
@@ -30,8 +36,8 @@ web directory for frontend and backend development
 	`cd chain && truffle test`
 # Run
 Run the following commands at project root location to start the website
-For test
-`cd web && npm start`
-or 
-`supervisor web/bin/www`
+
+```
+supervisor web/bin/www
+```
 
