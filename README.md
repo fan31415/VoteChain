@@ -33,7 +33,10 @@ web directory for frontend and backend development
 	```
 * Open Ganache(click app icon or use ganache-cli)
 * Build and test blockchain contract
-	`cd chain && truffle test`
+
+	```
+	cd chain && truffle test
+	```
 # Run
 Run the following commands at project root location to start the website
 
