@@ -2,6 +2,7 @@ import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 import { RenderNews } from './news';
+import {AuthorizePage} from "./authorize"
 
 function getNewsBlock(title, content, news_id) {
   let ret = []
@@ -77,6 +78,10 @@ function App() {
     )
   }
   // check authorized
+  let is_authed = check_auth()
+  if(!is_authed){
+    return <AuthorizePage chainAcct={login_state.addr}></AuthorizePage>
+  }
   // if not authorized, skip to sign up page
   return (
     <div>
