@@ -5,10 +5,17 @@ import { RenderNews } from './news';
 
 function getNewsBlock(title, content, news_id) {
   let ret = []
+  title = "This is the title of the news"
+  content = "This is the details of the news"
   for (let i = 0; i < 10; i++) {
-    ret.push(<RenderNews title={title} content={content} news_id={news_id} key={i} />);
+    ret.push(<RenderNews title={title} content={content} news_id={i} key={i} />);
   }
   return ret;
+}
+
+function check_auth(addr){
+  // invoke chain rpc to check
+  return true
 }
 
 // get address/private key from web3/metamask

@@ -1,6 +1,5 @@
 import React from 'react';
-
-const e = React.createElement;
+import { Button, ButtonToolbar, Jumbotron, Container, ButtonGroup, Alert } from 'react-bootstrap';
 
 class RealButtons extends React.Component{
   constructor(props){
@@ -13,7 +12,7 @@ class RealButtons extends React.Component{
   send_click(is_real){
     let send_result = Math.random();
     let send_result_bool = false;
-    if(send_result > 0.5){
+    if(send_result > 0.1){
       send_result_bool = true;
     }
     this.setState({ clicked: true, realed: is_real, sent: send_result_bool })
@@ -23,16 +22,24 @@ class RealButtons extends React.Component{
     console.log(this.state.clicked)
     if(!this.state.clicked){
       return(
-        <div>
+        <ButtonToolbar>
           <RealButton is_real={true} states={this.state} news_id={this.news_id} onClick={this.send_click}/>
           <RealButton is_real={false} states={this.state} news_id={this.news_id} onClick={this.send_click}/>
-        </div>
+        </ButtonToolbar>
       )
     } else {
       if(!this.state.sent){
-        return "send " + (this.state.realed ? 'real' : 'real') + " for news " + this.news_id + " failed."
+        return(
+        <Alert variant="danger">
+        {"You send " + (this.state.realed ? 'real' : 'real') + " for news " + this.news_id + " failed."}
+        </Alert>
+        )
       } else {
-        return "You " + (this.state.realed ? 'real' : 'Unreal') + " for news " + this.news_id
+        return (
+          <Alert variant="primary">
+          {"You vote " + (this.state.realed ? 'real' : 'Unreal') + " for news " + this.news_id}
+          </Alert>
+          )
       }
     }
   }
@@ -48,11 +55,24 @@ class RealButton extends React.Component {
   }
 
   origin_button(){
-    return e(
-      'button',
-      { onClick: () => this.onClick(this.is_real)},
-      this.is_real? 'real': 'Unreal'
-    );
+    if(this.is_real){
+      return (
+        <ButtonGroup className="mr-2" aria-label="Second group">
+      <Button size='sm' onClick={() => this.onClick(this.is_real)}> {'real'} </Button>
+      </ButtonGroup>
+      )
+    } else {
+      return(
+      <ButtonGroup className="mr-2" aria-label="Second group">
+      <Button size='sm' variant="danger" onClick={() => this.onClick(this.is_real)}> {'Unreal'} </Button>
+      </ButtonGroup>
+      )
+    }
+    // return e(
+    //   'button',
+    //   { onClick: () => this.onClick(this.is_real)},
+      
+    // );
   }
 
   render() {
@@ -61,20 +81,22 @@ class RealButton extends React.Component {
 }
 
 function NewsTitle(props){
-  return (<h3>{props.title}</h3>);
+  return (<h2>{props.title}</h2>);
 }
 
 function NewsContent(props){
-  return (<div>{props.content}</div>);
+  return (<p>{props.content}</p>);
 }
 
 function RenderNews(props){
   return (
-      <div>
+      <Jumbotron>
+        <Container>
         <NewsTitle title={props.title}/>
         <NewsContent content={props.content}/>
         <RealButtons news_id={props.news_id}/>
-      </div>
+        </Container>
+      </Jumbotron>
   );
 }
 
