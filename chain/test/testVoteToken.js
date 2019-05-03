@@ -79,7 +79,7 @@ contract('VoteController', async(accounts) => {
         options: 'Yes;No',
         expirationTime: time3
     }
-    it('test add open topic', async()=>{
+    it('test addOpenTopic(), getOwnedTopic(), getTopic(), getTopicCount()', async()=>{
         instance = await controller.deployed();
         let _topic_cnt = await instance.getTopicCount();
         await instance.addOpenTopic(topic1.stake, topic1.description, topic1.rate, topic1.options, topic1.expirationTime);
@@ -136,5 +136,8 @@ contract('VoteController', async(accounts) => {
         let result2 = await instance.getTopic(lists1[2])
         result2[1].toNumber().should.equal(topic2.stake);
 
-    })
+    });
+    it('test vote()', async() {
+        await instance.vote(0, 0)
+    });
 });

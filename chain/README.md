@@ -1,5 +1,7 @@
 # API Reference 0.1
 
+This reference is divided into three parts: [Core Part](#core-part), [Group Manage Part](#group-manage-part), [Token Part](#token-part). Each is corresponding to a blockchain smart contract.
+
 ## Core Part
 
 # Transaction Function
