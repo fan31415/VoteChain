@@ -19,9 +19,5 @@ module.exports = {
         solc: {
             version: "0.5.8", // A version or constraint - Ex. "^0.5.0"
         }
-    },
-    // Set default mocha options here, use special reporters etc.
-    mocha: {
-        // timeout: 100000
     }
 }

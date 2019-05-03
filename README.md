@@ -44,3 +44,11 @@ Run the following commands at project root location to start the website
 supervisor web/bin/www
 ```
 
+
+# Notice
+Due to the [issue](https://github.com/trufflesuite/truffle/issues/1909) with truffle, we do not use the lastest version, but use the following stable setting:
+
+* truffle `4.1.15`
+* `"openzeppelin-solidity": "^2.0.0"`
+* `pragma solidity ^0.4.2`
+
