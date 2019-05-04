@@ -162,7 +162,7 @@ contract('GroupController', async (accounts) => {
     })
 });
 
-//Vote controller functional test
+//Vote controller functional test, coverage essential tests
 
 contract('VoteController', async (accounts) => {
     var owner = accounts[0];
