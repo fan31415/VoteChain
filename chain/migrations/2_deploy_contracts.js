@@ -1,9 +1,9 @@
-var VoteToken = artifacts.require("VoteToken");
+var GroupController = artifacts.require("GroupController");
 var VoteController = artifacts.require("VoteController");
 
 module.exports = function(deployer) {
-	deployer.deploy(VoteToken);
-	// deployer.link(VoteToken, VoteController);
-	deployer.deploy(VoteController);
 
+	deployer.deploy(GroupController).then(()=>{
+		return deployer.deploy(VoteController, GroupController.address);
+		});
 }

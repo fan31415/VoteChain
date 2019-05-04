@@ -73,7 +73,6 @@ get detail of topic by id
 | name | type| description|example|
 | :-------- | :--------| :-- | :-- |
 |owner|address|who create this topic|0x1223123132|
-|groupId|uint|the permissioned group id of this topic, 0 means open to everyone|2|
 |stake|uint|the stake amount in Wei for each person|100000|
 | description|string|Format: title;detail;category;|Hip-hop or Blues which do you like;This vote is just for fun!;Music Genre|
 |rate|uint8|0 mean content safe for everyone|0|
@@ -83,6 +82,7 @@ get detail of topic by id
 |lastVoteTime|uint|the last voting time of this topic, init to 0, format in unix timestamp in seconds|1556906283|
 |createTIme|uint|the create time of this topic|1556906283|
 |expirationTime|uint|the unix expired timestamp in seconds|1556906283|
+|groupId|uint|the permissioned group id of this topic, 0 means open to everyone|2|
 
 ## getOwnedTopic
 ### Description
@@ -135,6 +135,18 @@ Check if user has been rewarded from this topic
 | :-------- | :--------| :-- | :-- |
 ||bool|true: user has been paid; false: user has not been paid|true|
 
+## getVotedOption
+### Description
+get the index of option of user voted on a certain topic
+### parameters
+| name | type| description|example|
+| :-------- | :--------| :-- | :-- |
+|topic_id|uint|the id of topic|22|
+### return value
+| name | type| description|example|
+| :-------- | :--------| :-- | :-- |
+|option_index|uint|the index of options|2|
+
 ---
 
 ## Group Manage Part
@@ -176,7 +188,7 @@ Change the owner of this group to a new one, only old owner can invoke this func
 |newOwner|address|the address of new owner|0xf1a9184ca7b9|
 
 # Call function
-## isMember
+## checkMember
 ### Description
 Check if user has been rewarded from this topic
 ### parameters
@@ -198,6 +210,19 @@ None
 | name | type| description|example|
 | :-------- | :--------| :-- | :-- |
 ||uint[]|group id lists of this owner|[3, 9, 23]|
+
+## getGroup
+### Description
+Get the detail of this group
+### parameters
+| name | type| description|example|
+| :-------- | :--------| :-- | :-- |
+|group_id|uint|the queried group id|9|
+### return value
+| name | type| description|example|
+| :-------- | :--------| :-- | :-- |
+|owner|address|the owner of this group|0xf1a9184ca7b9|
+|description|string|the description of group|'this group is for our company's internal management'|
 
 ---
 
