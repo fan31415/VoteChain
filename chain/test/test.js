@@ -461,9 +461,6 @@ contract('VoteController', async (accounts) => {
         let payUnit = await instance.getPayUnit.call(open_topic_id);
 
         balance.toNumber().should.equal(_balance.add(payUnit).toNumber());
-        console.log(balance.toString())
-        console.log(payUnit.toNumber())
-        console.log(_balance.toString())
 
         //payoff next winner
         _balance = await instance.balanceOf(tester0);
