@@ -410,24 +410,25 @@ contract('VoteController', async (accounts) => {
 
         //TODO: check deleteMember()
     })
-    it('vote() check expiration error, payoff()', async () => {
+    it('vote() check expiration error, payoff(), checkPayPermission()', async () => {
         await instance.addOpenTopic(topic3.stake, topic3.description, topic3.rate, topic3.options, shortExpir);
         let open_topic_id = await instance.getTopicCount.call();
 
-        //give tester0 enough money
+        //give tester0 enough tokens
         await instance.transfer(tester0, 1000000000);
         await instance.transfer(tester1, 1000000000);
         await instance.transfer(tester2, 1000000000);
         await instance.transfer(accounts[5], 1000000000);
         await instance.transfer(accounts[6], 1000000000);
 
-        await instance.vote(open_topic_id, 1);
+        await instance.vote(open_topic_id, 1, {from: owner});
         await instance.vote(open_topic_id, 1, { from: tester0 });
         await instance.vote(open_topic_id, 1, { from: tester1 });
         await instance.vote(open_topic_id, 2, { from: tester2 });
         await instance.vote(open_topic_id, 2, { from: accounts[5] });
 
-
+        let err_code = await instance.checkPayPermission(open_topic_id);
+        err_code.toNumber().should.equal(1, 'pay permissionCheck error');
         try {
             await instance.payoff(open_topic_id);
         } catch (error) {
@@ -452,8 +453,10 @@ contract('VoteController', async (accounts) => {
             should.exist(error, 'expiration limit failed');
 
         }
+        err_code = await instance.checkPayPermission(open_topic_id);
+        err_code.toNumber().should.equal(0, 'payoff should have permission');
         let _balance = await instance.balanceOf.call(owner);
-         await instance.payoff(open_topic_id);
+        await instance.payoff(open_topic_id, {from: owner});
         let balance = await instance.balanceOf.call(owner);
         let payUnit = await instance.getPayUnit.call(open_topic_id);
 
@@ -466,19 +469,13 @@ contract('VoteController', async (accounts) => {
         _balance = await instance.balanceOf(tester0);
         await instance.payoff(open_topic_id, {from: tester0});
         balance = await instance.balanceOf(tester0);
+        payUnit = await instance.getPayUnit.call(open_topic_id);
         balance.toNumber().should.equal(_balance.add(payUnit).toNumber());
-        console.log(balance.toString())
-        console.log(payUnit.toNumber())
-        console.log(_balance.toString())
-
          //payoff next winner
         _balance = await instance.balanceOf(tester1);
         await instance.payoff(open_topic_id, {from: tester1});
         balance = await instance.balanceOf(tester1);
         balance.toNumber().should.equal(_balance.add(payUnit).toNumber());
-        console.log(balance.toString())
-        console.log(payUnit.toNumber())
-        console.log(_balance.toString())
 
         //payoff loser 
         _balance = await instance.balanceOf(tester2);
@@ -493,11 +490,18 @@ contract('VoteController', async (accounts) => {
         balance.toNumber().should.equal(_balance.toNumber());
 
         //payoff others
+        
         _balance = await instance.balanceOf(accounts[6]);
-        await instance.payoff(open_topic_id, {from: accounts[6]});
+        try {
+            await instance.payoff(open_topic_id, {from: accounts[6]});
+        } catch (error) {
+            console.log(error.message);
+            should.exist(error, 'non participants can not payoff');
+
+        }
         balance = await instance.balanceOf(accounts[6]);
         balance.toNumber().should.equal(_balance.toNumber());
 
-
     })
+    //TODO: test checkPermission() and payoff() divide 0 error
 });

@@ -167,28 +167,37 @@ contract VoteController is ERC20, ERC20Detailed   {
     	uint[] storage list = ownedTopics[owner];
     	return list;
     }
+
+    //1: vote expired
+    //2: user has not voted
+    //3: user has been paid
+    //4: divide 0 error
+    //0: no error
+    function checkPayPermission(uint topic_id) public view returns(uint) {
+      Topic storage item = topics[topic_id];
+      if (block.timestamp < item.expirationTime) {
+        return 1;
+      }
+      if (!isVote[msg.sender][topic_id]) {
+        return 2;
+      } 
+      if (isPaid[msg.sender][topic_id]) {
+         return 3;
+      }
+      if (item.count1 == 0 || item.count2 == 0) {
+        return 4;
+      }
+      // if ((item.count1 > item.count2 && votedOption[msg.sender][topic_id] == 2)||(item.count2 > item.count1 && votedOption[msg.sender][topic_id] == 1)) {
+      //     return 5;
+      //   }
+      return 0;
+    }
     //user check vote result of an topic
     function payoff(uint topic_id) public {
-    	//vote expired
-    	require(block.timestamp > item.expirationTime);
-    	//user voted
-    	require(isVote[msg.sender][topic_id]);
-    	//user not been paid
-    	require(!isPaid[msg.sender][topic_id]);
+      require(checkPayPermission(topic_id) == 0);
     	isPaid[msg.sender][topic_id] = true;
 
-    	Topic storage item = topics[topic_id];
-
-    	//avoid divide 0 error
-    	require(item.count1 != 0 && item.count2 != 0);
-
-      //user win or draw
-      if (item.count1 > item.count2) {
-        require(votedOption[msg.sender][topic_id] == 1);
-      } else if (item.count2 > item.count1) {
-        require(votedOption[msg.sender][topic_id] == 2);
-      }
-
+      Topic storage item = topics[topic_id];
     	//possible initialization
     	if (item.payUnit == 0) {
     		uint totalCount = item.count1 + item.count2;
@@ -201,7 +210,13 @@ contract VoteController is ERC20, ERC20Detailed   {
     		}
     	}
 
-    	_transfer(address(this), msg.sender, item.payUnit);
+      //user win or draw, or do nothing
+      if ((item.count1 > item.count2 && votedOption[msg.sender][topic_id] == 1)||(item.count2 > item.count1 && votedOption[msg.sender][topic_id] == 2)) {
+        _transfer(address(this), msg.sender, item.payUnit);
+      }
+
+
+    	
     }
 
     //Return error code

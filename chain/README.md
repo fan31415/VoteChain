@@ -1,4 +1,4 @@
-# API Reference 0.1
+# API Reference 0.2
 
 This reference is divided into three parts: [Core Part](#core-part), [Group Manage Part](#group-manage-part), [Token Part](#token-part). Each is corresponding to a blockchain smart contract.
 
@@ -147,7 +147,23 @@ get the index of option of user voted on a certain topic
 | :-------- | :--------| :-- | :-- |
 |option_index|uint|the index of options|2|
 
+## checkPayPermission
+### Description
+Check if user has permission to obtain reward from an expired voting, return an uint8 error code
+### parameters
+| name | type| description|example|
+| :-------- | :--------| :-- | :-- |
+|topic_id|uint|the id of topic|22|
+### return value
+| name | type| description|example|
+| :-------- | :--------| :-- | :-- |
+|error_code|uint8|1: vote expired; 2: user has not voted; 3: user has been paid; 4: divide 0 error; 0: no error|1|
+
+
 ---
+
+
+
 
 ## Group Manage Part
 # Transaction Function
