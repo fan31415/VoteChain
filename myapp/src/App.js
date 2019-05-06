@@ -7,6 +7,7 @@ import UserControl from "./controller"
 import {RiseVotePage} from "./rise_vote"
 import {AddGroup} from "./add_group"
 import {AddMember} from "./add_member"
+import {testVote} from "./contract"
 
 function getNewsBlock(title, content, news_id) {
   let ret = []
@@ -126,6 +127,7 @@ class App extends React.Component {
       return <AuthorizePage chainAcct={login_state.addr}></AuthorizePage>
     }
     this.chain_addr = login_state.addr
+    testVote(1,2,3)
     // if not authorized, skip to sign up page
     if(this.state.ui === 0){
       return (
