@@ -1,14 +1,13 @@
-// var HDWalletProvider = require("truffle-hdwallet-provider");
-// var mnemonic = "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat";
+const PrivateKeyProvider = require("truffle-privatekey-provider");
+const privateKey = process.env.privateKey
 module.exports = {
     // See <http://truffleframework.com/docs/advanced/configuration>
     // for more about customizing your Truffle configuration!
     networks: {
-        // ropsten: {
-        //     provider: function() {
-        //         return new HDWalletProvider(mnemonic, "https://ropsten.infura.io/j0NInWvBFYLdSKnPR3b3")
-        //     }
-        // },
+        ropsten: {
+            provider: new PrivateKeyProvider(privateKey, "https://ropsten.infura.io/v3/" + process.env.infuraKey),
+            network_id: "*"
+        },
         development: {
             host: "localhost",
             port: 7545,

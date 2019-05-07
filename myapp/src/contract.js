@@ -17,7 +17,8 @@ function getGroupContract(){
 }
 
 function testVote(user1, user2, val){
-    let provider = new window.Web3.providers.HttpProvider("http://127.0.0.1:7545")
+    // let provider = new window.Web3.providers.HttpProvider("http://127.0.0.1:7545")
+    let provider = new window.Web3.providers.HttpProvider("https://ropsten.infura.io/v3/5b04cf5a131d47e9855ab1ce366110dd")
     let vc = getVoteContract()
     let gc = getGroupContract()
     vc.setProvider(provider)

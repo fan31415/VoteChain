@@ -5,8 +5,9 @@
   "license": "MIT",
   "dependencies": {
     "chai": "^4.1.2",
+    "dotenv": "^8.0.0",
     "moment": "^2.22.2",
     "openzeppelin-solidity": "^2.0.0",
-    "truffle-hdwallet-provider": "^1.0.8"
+    "truffle-privatekey-provider": "^1.1.0"
   }
 }
