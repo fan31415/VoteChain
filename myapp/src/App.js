@@ -7,16 +7,14 @@ import UserControl from "./controller"
 import {RiseVotePage} from "./rise_vote"
 import {AddGroup} from "./add_group"
 import {AddMember} from "./add_member"
-import {testVote} from "./contract"
+import {ContractManager} from "./contract"
 
-function getNewsBlock(title, content, news_id) {
-  let ret = []
-  title = "This is the title of the news"
-  content = "This is the details of the news"
-  for (let i = 0; i < 10; i++) {
-    ret.push(<RenderNews title={title} content={content} news_id={i} topic="topic1" category="c1" bt0="unreal" bt1="real" key={i} />);
-  }
-  return ret;
+function getNewsBlock(title, content, news_id, category, op1, op2) {
+  return (<RenderNews title={title} content={content} news_id={news_id} category={category} bt0={op1} bt1={op2} key={news_id} />);
+}
+
+function getAllNews(news_list){
+
 }
 
 function check_auth(addr) {
@@ -76,44 +74,92 @@ function installMetaMask() {
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {ui: 0};
+    this.state = {ui: 0, news_objects: [], n_news: 0};
     this.set_global_ui = this.set_global_ui.bind(this);
     this.chain_addr = ""
+    this.contractManager = new ContractManager();
+    this.login_state = login()
+    // this.contractManager.getTopicCount();
   }
+
+  async componentDidMount(){
+    if(!this.login_state.logined){
+      return // if not login, return directly.
+    }
+    // load news
+    let news_info = await this.update_news(this.login_state.addr)
+    this.setState({n_news: news_info.n_news, news_objects: news_info.news_list})
+  }
+
   set_global_ui(ui_idx){
     this.setState({ui: ui_idx})
   }
+
   create_new_vote(){
     return (
       <div id="create_vote">
-      <RiseVotePage chain_addr={this.chain_addr} set_global_ui={this.set_global_ui}></RiseVotePage>
+      <RiseVotePage chain_addr={this.chain_addr} set_global_ui={this.set_global_ui} cm={this.contractManager}></RiseVotePage>
       </div>
     )
   }
   create_new_group(){
     return (
       <div id="create_group">
-      <AddGroup chain_addr={this.chain_addr} set_global_ui={this.set_global_ui}></AddGroup>
+      <AddGroup chain_addr={this.chain_addr} set_global_ui={this.set_global_ui} cm={this.contractManager}></AddGroup>
       </div>
     )
   }
   add_member(){
     return (
       <div id="add_member">
-      <AddMember chain_addr={this.chain_addr} set_global_ui={this.set_global_ui}></AddMember>
+      <AddMember chain_addr={this.chain_addr} set_global_ui={this.set_global_ui} cm={this.contractManager}></AddMember>
       </div>
     )
   }
+
   list_news(){
-    return (
+    let news_jsx = []
+    for(let i=this.state.n_news-1;i>=0;i--){
+      let newsObj = this.state.news_objects[i]
+      let newsDesc = newsObj.desc;
+      let details = newsDesc.split(";")
+      let title = details[0]
+      let content = details[1]
+      let category = details[2]
+      let newsOpts = newsObj.options.split(";");
+      let opt1 = newsOpts[0]
+      let opt2 = newsOpts[1]
+      let allowedGroup = newsObj.groupId;
+      let newsBlock = getNewsBlock(title, content, i, category, opt1, opt2)
+      news_jsx.push(newsBlock)
+    }
+    return(
       <div id="news">
-        <h2> News List </h2>
-        {getNewsBlock("t1", "a1", "1")}
-      </div>
+      <h2> News List </h2>
+      {news_jsx}
+    </div>
     )
   }
+
+  async update_news(user_addr){
+    let n_news = await this.contractManager.getTopicCount()
+    let news_list = []
+    for(let i=n_news;i>=1;i--){
+      let canView = await this.contractManager.permissionCheck(i)
+      if(canView === 0){
+        let news = await this.contractManager.getTopic(i, true)
+        console.log(news)
+        news_list.push(news)
+      }
+    }
+    return {
+      n_news: news_list.length,
+      news_list: news_list,
+    }
+  }
+
   render() {
-    var login_state = login()
+    var login_state = this.login_state
     if (!login_state.logined) {
       return (
         <div>
@@ -127,33 +173,33 @@ class App extends React.Component {
       return <AuthorizePage chainAcct={login_state.addr}></AuthorizePage>
     }
     this.chain_addr = login_state.addr
-    testVote(1,2,3)
+
     // if not authorized, skip to sign up page
     if(this.state.ui === 0){
       return (
         <div>
-          <UserControl username={login_state.addr} set_global_ui={this.set_global_ui}></UserControl>
+          <UserControl addr={login_state.addr} set_global_ui={this.set_global_ui} cm={this.contractManager}></UserControl>
           {this.list_news()}
         </div>
       );
     } else if(this.state.ui === 1){
       return (
         <div>
-          <UserControl username={login_state.addr} set_global_ui={this.set_global_ui}></UserControl>
+          <UserControl addr={login_state.addr} set_global_ui={this.set_global_ui} cm={this.contractManager}></UserControl>
           {this.create_new_group()}
         </div>
       );
     } else if (this.state.ui === 2){
       return (
         <div>
-          <UserControl username={login_state.addr} set_global_ui={this.set_global_ui}></UserControl>
+          <UserControl addr={login_state.addr} set_global_ui={this.set_global_ui} cm={this.contractManager}></UserControl>
           {this.add_member()}
         </div>
       );
     } else if (this.state.ui === 3){
       return (
         <div>
-          <UserControl username={login_state.addr} set_global_ui={this.set_global_ui}></UserControl>
+          <UserControl addr={login_state.addr} set_global_ui={this.set_global_ui} cm={this.contractManager}></UserControl>
           {this.create_new_vote()}
         </div>
       );

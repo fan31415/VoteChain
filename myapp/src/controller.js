@@ -4,25 +4,41 @@ import { Button, ButtonToolbar, ButtonGroup} from 'react-bootstrap';
 class UserControl extends React.Component {
     constructor(props){
         super(props);
+        this.contractManager = props.cm
         this.buttons = this.buttons.bind(this)
         this.get_tokens = this.get_tokens.bind(this)
         this.apply_rewards = this.apply_rewards.bind(this)
-        this.username = props.username;
-        let now_tokens = this.get_tokens();
-        this.state = {token: now_tokens}
+        this.test_button = this.test_button.bind(this)
+        this.addr = props.addr;
+        this.state = {token: -1}
+        this.get_tokens();
         this.set_global_ui = props.set_global_ui; // todo: implement a global ui state
     }
+
     get_tokens(){
         // call get tokens()
-        let tokens = 1.0
-        return tokens;
+        (async () => {
+            console.log(this)
+            let tokens = await this.contractManager.balanceOf(this.addr)
+            this.setState({token: tokens})
+        })()
     }
+
     apply_rewards(){
         // todo: call apply rewards
         // todo: tell user rewards will be added after a while
         this.setState({token: 2.0})
         console.log("apply_rewards")
+        console.log(this.contractManager.addOpenTopic)
+        this.contractManager.getTopic(1, false)
     }
+
+    async test_button(){
+        // let ret = await this.contractManager.getOwnedGroups()
+        let ret = await this.contractManager.permissionCheck(5)
+        console.log("owned group:", ret)
+    }
+
     buttons(){
         return(
             <ButtonToolbar>
@@ -41,6 +57,9 @@ class UserControl extends React.Component {
             <ButtonGroup className="mr-2">
                 <Button onClick={this.apply_rewards}> Get rewards </Button>
             </ButtonGroup>
+            <ButtonGroup className="mr-2">
+                <Button onClick={this.test_button}> Test USE </Button>
+            </ButtonGroup>
             </ButtonToolbar>
         )
     }
@@ -48,7 +67,7 @@ class UserControl extends React.Component {
         return (
             <div id="user_control">
                 <div id="user_info">
-                    <p>your address: {this.username} </p>
+                    <p>your address: {this.addr} </p>
                     <p>your tokens: {this.state.token} </p>
                 </div>
                 {this.buttons()}

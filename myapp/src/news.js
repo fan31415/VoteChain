@@ -94,7 +94,6 @@ function NewsContent(props) {
 
 function NewsAttribute(props) {
   return (<div>
-    <b>topic:</b> {props.topic}
     <b>category:</b> {props.category}
   </div>)
 }
@@ -104,7 +103,7 @@ function RenderNews(props) {
     <Jumbotron>
       <Container>
         <NewsTitle title={props.title} />
-        <NewsAttribute topic={props.topic} category={props.category}> </NewsAttribute>
+        <NewsAttribute category={props.category}> </NewsAttribute>
         <NewsContent content={props.content} />
         <RealButtons news_id={props.news_id} bt0={props.bt0} bt1={props.bt1} />
       </Container>

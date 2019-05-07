@@ -1,6 +1,175 @@
 import gc from './GroupController.json'
 import vc from './VoteController.json'
 
+class ContractManager{
+    constructor(){
+        this.vc = getVoteContract()
+        this.gc = getGroupContract()
+        let provider = window.web3.currentProvider;
+        this.vc.setProvider(provider)
+        this.gc.setProvider(provider)
+        this.myAcc = window.web3.eth.accounts[0];
+        window.vc = vc
+        window.gc = gc
+    }
+
+    // transaction of vc
+    addOpenTopic(stake, description, rate, options, expire){
+        this.vc.deployed().then(function(instance){
+            return instance.addOpenTopic(stake, description, rate, options, expire);
+        })
+    }
+    addGroupTopic(stake, description, rate, options, expire, groupId){
+        this.vc.deployed().then(function(instance){
+            return instance.addGroupTopic(groupId, stake, description, rate, options, expire);
+        })
+    }
+    vote(topicId, optionIdx){
+        this.vc.deployed().then(function(instance){
+            return instance.vote(topicId, optionIdx);
+        })
+    }
+    payoff(topicId){
+        this.vc.deployed().then(function(instance){
+            return instance.vote(topicId);
+        })
+    }
+    // call of vc
+    async getTopicCount(){
+        let instance = await this.vc.deployed()
+        let result = await instance.getTopicCount.call()
+        return result.toNumber()
+    }
+
+    async getTopic(id, canVote){
+        let instance = await this.vc.deployed()
+        let result = await instance.getTopic.call(id, canVote)
+        let ret = {
+            owner: result[0],
+            stake: result[1].toNumber(),
+            desc: result[2],
+            rate: result[3].toNumber(),
+            options: result[4],
+            count1: result[5].toNumber(),
+            count2: result[6].toNumber(),
+            lastVoteTime: result[7].toNumber(),
+            createTime: result[8].toNumber(),
+            expirationTime: result[9].toNumber(),
+            groupId: result[10].toNumber(),
+        }
+        return ret
+    }
+
+    getOwnedTopic(owner){
+        var ret
+        this.vc.deployed().then(function(instance){
+            return instance.getOwnedTopic.call(owner);
+        }).then(function(result){
+            ret = result;
+        })
+        return ret;
+    }
+    async permissionCheck(topicId){
+        let instance = await this.vc.deployed()
+        let result = await instance.permissionCheck.call(topicId);
+        return result.toNumber()
+    }
+
+    isUserVote(topicId, user){
+        var ret
+        this.vc.deployed().then(function(instance){
+            return instance.isUserVote.call(topicId, user);
+        }).then(function(result){
+            ret = result;
+        })
+        return ret;
+    }
+
+    isUserPaid(topicId, user){
+        var ret
+        this.vc.deployed().then(function(instance){
+            return instance.isUserPaid(topicId, user);
+        }).then(function(result){
+            ret = result;
+        })
+        return ret;
+    }
+    getVotedOption(topicId){
+        var ret
+        this.vc.deployed().then(function(instance){
+            return instance.getVotedOption(topicId);
+        }).then(function(result){
+            ret = result.toNumber();
+        })
+        return ret;
+    }
+    checkPayPermission(topicId){
+        var ret
+        this.vc.deployed().then(function(instance){
+            return instance.checkPayPermission(topicId);
+        }).then(function(result){
+            ret = result.toNumber();
+        })
+        return ret;
+    }
+    // transaction of group contract
+    createGroup(description){
+        this.gc.deployed().then(function(instance){
+            return instance.createGroup(description);
+        })
+    }
+    addMember(groupId, user){
+        this.gc.deployed().then(function(instance){
+            return instance.addMember(groupId, user);
+        })
+    }
+    deleteMember(groupId, user){
+        this.gc.deployed().then(function(instance){
+            return instance.deleteMember(groupId, user);
+        })
+    }
+    changeOwner(groupId, newOwner){
+        this.gc.deployed().then(function(instance){
+            return instance.changeOwner(groupId, newOwner);
+        })
+    }
+    // call of group contract
+    async checkMember(user, groupId){
+        let instance = await this.gc.deployed()
+        let checkMemberResult = await instance.checkMember.call(user, groupId)
+        return checkMemberResult
+    }
+    async getOwnedGroups(){
+        let instance = await this.gc.deployed()
+        let ret = await instance.getOnwedGroups.call()
+        let groups = []
+        for(let i=0;i<ret.length;i++){
+            groups.push(ret[i].toNumber())
+        }
+        return groups
+    }
+
+    getGroup(groupId){
+        var ret
+        this.gc.deployed().then(function(instance){
+            return instance.getGroup.call(groupId);
+        }).then(function(result){
+            ret = {
+                owner: result[0],
+                description: result[1],
+            };
+        })
+        return ret;
+    }
+    // account
+    async balanceOf(owner){
+        let instance = await this.vc.deployed()
+        let ret = await instance.balanceOf.call(owner)
+        return ret.toNumber()
+    }
+
+}
+
 function getContract(json_obj){
     return window.TruffleContract(json_obj)
 }
@@ -16,23 +185,4 @@ function getGroupContract(){
     return getContract(gc)
 }
 
-function testVote(user1, user2, val){
-    // let provider = new window.Web3.providers.HttpProvider("http://127.0.0.1:7545")
-    let provider = new window.Web3.providers.HttpProvider("https://ropsten.infura.io/v3/5b04cf5a131d47e9855ab1ce366110dd")
-    let vc = getVoteContract()
-    let gc = getGroupContract()
-    vc.setProvider(provider)
-    gc.setProvider(provider)
-    let web3 = new window.Web3(provider);
-    console.log(web3.eth.blockNumber);
-    let acc1 = web3.eth.accounts[0];
-    console.log(acc1)
-    vc.deployed().then(function(instance){
-        var deployed = instance;
-        return instance.transferFrom(acc1, '0xB1542b7e4C0D3bF6cC29369947f6Ea4654294759', 10000);
-    }).then(function(result){
-        console.log("transfer result:", result)
-    })
-}
-
-export {testVote};
+export {ContractManager};
