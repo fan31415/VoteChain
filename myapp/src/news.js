@@ -4,43 +4,100 @@ import { Button, ButtonToolbar, Jumbotron, Container, ButtonGroup, Alert } from 
 class RealButtons extends React.Component {
   constructor(props) {
     super(props);
-    this.bt0 = props.bt0 // button 0 name (is_real to false)
-    this.bt1 = props.bt1 // button 1 name (is_real to true)
-    this.state = { clicked: false, realed: false, sent: false };
+    this.contractManager = props.cm
+    this.bt0 = props.bt0 // button 0 name
+    this.bt1 = props.bt1 // button 1 name
+    this.useraddr = props.addr
+    this.expired = props.expired
+    this.state = { loaded:false, clicked: false, selectedIdx: 0, sent: false, expired: this.expired, reward: 2}; // reward: 0=have reward, 1=reward paid, 2=no reward
     this.news_id = props.news_id;
     this.send_click = this.send_click.bind(this);
+    this.get_reward = this.get_reward.bind(this);
   }
 
-  send_click(is_real) {
-    let send_result = Math.random();
-    let send_result_bool = false;
-    if (send_result > 0.1) {
-      send_result_bool = true;
+  async componentDidMount(){
+    // check vote
+    let isUserVote = await this.contractManager.isUserVote(this.news_id, this.useraddr)
+    console.log("have_vote", isUserVote)
+    if(isUserVote){
+      let userChoiceIdx = await this.contractManager.getVotedOption(this.news_id)
+      // check reward
+      var reward
+      let rewardStatus = await this.contractManager.checkPayPermission(this.news_id)
+      if(rewardStatus === 0){
+        reward = 0
+      } else if(rewardStatus === 3){
+        reward = 1
+      } else {
+        reward = 2
+      }
+      this.setState({loaded:true, clicked: true, selectedIdx: userChoiceIdx, sent: true, reward: reward})
+    } else {
+      this.setState({loaded:true, clicked: false})
     }
+  }
+
+  send_click(selectedIdx) {
     // todo: call send_click()
-    this.setState({ clicked: true, realed: is_real, sent: send_result_bool })
+    console.log(this.news_id, selectedIdx)
+    this.contractManager.vote(this.news_id, selectedIdx)
+    this.setState({ clicked: true, selectedIdx: selectedIdx, sent: true })
+  }
+
+  get_reward(){
+    if(this.state.reward === 0){
+      this.contractManager.payoff(this.news_id)
+    }
   }
 
   render() {
     console.log(this.state.clicked)
+    if(this.state.expired){
+      if(this.state.reward === 0){
+        // can get reward
+        return (
+          <ButtonGroup className="mr-2" aria-label="Reward group">
+          <Button size='sm' onClick={() => this.get_reward()}> {"Get Reward"} </Button>
+          </ButtonGroup>
+        )
+
+      } else if(this.state.reward === 1){
+        // have been paid for reward
+        return(
+          <Alert variant="primary">
+          {"You have got reward for your vote."}
+        </Alert>
+        )
+      } else {
+        // no reward
+        return (
+          <Alert variant="danger">
+          {"This topic is expired."}
+        </Alert>
+        )
+      }
+    }
+    if(!this.state.loaded){
+      return "loading..."
+    }
     if (!this.state.clicked) {
       return (
         <ButtonToolbar>
-          <RealButton is_real={true} states={this.state} news_id={this.news_id} display={this.bt1} onClick={this.send_click} />
-          <RealButton is_real={false} states={this.state} news_id={this.news_id} display={this.bt0} onClick={this.send_click} />
+          <RealButton selectedIdx={1} states={this.state} news_id={this.news_id} display={this.bt0} onClick={this.send_click} />
+          <RealButton selectedIdx={2} states={this.state} news_id={this.news_id} display={this.bt1} onClick={this.send_click} />
         </ButtonToolbar>
       )
     } else {
       if (!this.state.sent) {
         return (
           <Alert variant="danger">
-            {"You send " + (this.state.realed ? this.bt1 : this.bt0) + " for news " + this.news_id + " failed."}
+            {"You send " + (this.state.selectedIdx === 1 ? this.bt0 : this.bt1) + " for news " + this.news_id + " failed."}
           </Alert>
         )
       } else {
         return (
           <Alert variant="primary">
-            {"You vote " + (this.state.realed ? this.bt1 : this.bt0) + " for news " + this.news_id}
+            {"You have voted " + (this.state.selectedIdx === 1 ? this.bt0 : this.bt1) + " for news " + this.news_id}
           </Alert>
         )
       }
@@ -51,7 +108,7 @@ class RealButtons extends React.Component {
 class RealButton extends React.Component {
   constructor(props) {
     super(props);
-    this.is_real = props.is_real; // 0 = false, 1 = true
+    this.selectedIdx = props.selectedIdx; // 1 or 2
     this.states = props.states;
     this.news_id = props.news_id;
     this.onClick = props.onClick;
@@ -59,22 +116,22 @@ class RealButton extends React.Component {
   }
 
   origin_button() {
-    if (this.is_real) {
+    if (this.selectedIdx === 1) {
       return (
         <ButtonGroup className="mr-2" aria-label="Second group">
-          <Button size='sm' onClick={() => this.onClick(this.is_real)}> {this.bt_display} </Button>
+          <Button size='sm' onClick={() => this.onClick(this.selectedIdx)}> {this.bt_display} </Button>
         </ButtonGroup>
       )
     } else {
       return (
         <ButtonGroup className="mr-2" aria-label="Second group">
-          <Button size='sm' variant="danger" onClick={() => this.onClick(this.is_real)}> {this.bt_display} </Button>
+          <Button size='sm' variant="danger" onClick={() => this.onClick(this.selectedIdx)}> {this.bt_display} </Button>
         </ButtonGroup>
       )
     }
     // return e(
     //   'button',
-    //   { onClick: () => this.onClick(this.is_real)},
+    //   { onClick: () => this.onClick(this.selectedIdx)},
 
     // );
   }
@@ -105,7 +162,7 @@ function RenderNews(props) {
         <NewsTitle title={props.title} />
         <NewsAttribute category={props.category}> </NewsAttribute>
         <NewsContent content={props.content} />
-        <RealButtons news_id={props.news_id} bt0={props.bt0} bt1={props.bt1} />
+        <RealButtons news_id={props.news_id} bt0={props.bt0} bt1={props.bt1} cm={props.cm} addr={props.addr} expired={props.expired} />
       </Container>
     </Jumbotron>
   );

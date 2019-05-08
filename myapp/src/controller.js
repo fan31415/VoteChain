@@ -10,7 +10,7 @@ class UserControl extends React.Component {
         this.apply_rewards = this.apply_rewards.bind(this)
         this.test_button = this.test_button.bind(this)
         this.addr = props.addr;
-        this.state = {token: -1}
+        this.state = {token: -1, loaded: false}
         this.get_tokens();
         this.set_global_ui = props.set_global_ui; // todo: implement a global ui state
     }
@@ -20,11 +20,12 @@ class UserControl extends React.Component {
         (async () => {
             console.log(this)
             let tokens = await this.contractManager.balanceOf(this.addr)
-            this.setState({token: tokens})
+            this.setState({token: tokens, loaded: true})
         })()
     }
 
     apply_rewards(){
+        // decrepted!
         // todo: call apply rewards
         // todo: tell user rewards will be added after a while
         this.setState({token: 2.0})
@@ -54,12 +55,12 @@ class UserControl extends React.Component {
             <ButtonGroup className="mr-2">
                 <Button onClick={() => {this.set_global_ui(3)}}> Create News </Button>
             </ButtonGroup>
-            <ButtonGroup className="mr-2">
-                <Button onClick={this.apply_rewards}> Get rewards </Button>
+            {/* <ButtonGroup className="mr-2">
+                <Button onClick={this.apply_rewards}> Reward Test </Button>
             </ButtonGroup>
             <ButtonGroup className="mr-2">
                 <Button onClick={this.test_button}> Test USE </Button>
-            </ButtonGroup>
+            </ButtonGroup> */}
             </ButtonToolbar>
         )
     }
@@ -68,7 +69,7 @@ class UserControl extends React.Component {
             <div id="user_control">
                 <div id="user_info">
                     <p>your address: {this.addr} </p>
-                    <p>your tokens: {this.state.token} </p>
+                    <p>your tokens: {this.state.loaded? this.state.token: "loading..."} </p>
                 </div>
                 {this.buttons()}
             </div>

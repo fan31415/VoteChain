@@ -69,49 +69,37 @@ class ContractManager{
         })
         return ret;
     }
+    
     async permissionCheck(topicId){
         let instance = await this.vc.deployed()
         let result = await instance.permissionCheck.call(topicId);
         return result.toNumber()
     }
 
-    isUserVote(topicId, user){
-        var ret
-        this.vc.deployed().then(function(instance){
-            return instance.isUserVote.call(topicId, user);
-        }).then(function(result){
-            ret = result;
-        })
-        return ret;
+    async isUserVote(topicId, user){
+        let instance = await this.vc.deployed()
+        let result = await instance.isUserVote.call(user, topicId)
+        return result
     }
 
-    isUserPaid(topicId, user){
-        var ret
-        this.vc.deployed().then(function(instance){
-            return instance.isUserPaid(topicId, user);
-        }).then(function(result){
-            ret = result;
-        })
-        return ret;
+    async isUserPaid(topicId, user){
+        let instance = await this.vc.deployed()
+        let result = await instance.isUserPaid(topicId, user);
+        return result
     }
-    getVotedOption(topicId){
-        var ret
-        this.vc.deployed().then(function(instance){
-            return instance.getVotedOption(topicId);
-        }).then(function(result){
-            ret = result.toNumber();
-        })
-        return ret;
+
+    async getVotedOption(topicId){
+        let instance = await this.vc.deployed()
+        let result = await instance.getVotedOption(topicId)
+        return result.toNumber()
     }
-    checkPayPermission(topicId){
-        var ret
-        this.vc.deployed().then(function(instance){
-            return instance.checkPayPermission(topicId);
-        }).then(function(result){
-            ret = result.toNumber();
-        })
-        return ret;
+
+    async checkPayPermission(topicId){
+        let instance = await this.vc.deployed()
+        let result = await instance.checkPayPermission(topicId);
+        return result.toNumber()
     }
+
     // transaction of group contract
     createGroup(description){
         this.gc.deployed().then(function(instance){

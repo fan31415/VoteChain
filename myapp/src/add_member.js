@@ -29,7 +29,7 @@ class AddMember extends React.Component {
             }
         }
         let member = target.elements.member.value
-        if(validGroup == 0){
+        if(validGroup === 0){
             alert("Please click a group!")
             return
         }

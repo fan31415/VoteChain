@@ -1,21 +1,13 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
-import { RenderNews } from './news';
 import { AuthorizePage } from "./authorize"
 import UserControl from "./controller"
 import {RiseVotePage} from "./rise_vote"
 import {AddGroup} from "./add_group"
 import {AddMember} from "./add_member"
 import {ContractManager} from "./contract"
-
-function getNewsBlock(title, content, news_id, category, op1, op2) {
-  return (<RenderNews title={title} content={content} news_id={news_id} category={category} bt0={op1} bt1={op2} key={news_id} />);
-}
-
-function getAllNews(news_list){
-
-}
+import { NewsList } from './news_list';
 
 function check_auth(addr) {
   // invoke chain rpc to check
@@ -50,15 +42,23 @@ function login() {
       return { state: 20000 };
     }
   }
+  var installed = false;
   var logined = false;
   var addr = "1234";
 
   let ret = is_eth_address_exist()
   if (ret.state === 0) {
+    installed = true;
     logined = true;
     addr = ret.acct;
   }
+  if(ret.state === 20000){
+    installed = true;
+    logined = false;
+    addr = -1;
+  }
   var login_state = {
+    installed: installed,
     logined: logined,
     addr: addr
   }
@@ -71,10 +71,16 @@ function installMetaMask() {
   </div>
 }
 
+function pleaseLogin(){
+  return <div>
+  <h1> Please log in metamask extension on Chrome before using VoteChain! </h1>
+</div>
+}
+
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {ui: 0, news_objects: [], n_news: 0};
+    this.state = {ui: 0};
     this.set_global_ui = this.set_global_ui.bind(this);
     this.chain_addr = ""
     this.contractManager = new ContractManager();
@@ -83,12 +89,11 @@ class App extends React.Component {
   }
 
   async componentDidMount(){
-    if(!this.login_state.logined){
+    if(!this.login_state.installed || ! this.login_state.logined){
       return // if not login, return directly.
     }
     // load news
-    let news_info = await this.update_news(this.login_state.addr)
-    this.setState({n_news: news_info.n_news, news_objects: news_info.news_list})
+    this.chain_addr = this.login_state.addr
   }
 
   set_global_ui(ui_idx){
@@ -117,53 +122,19 @@ class App extends React.Component {
     )
   }
 
-  list_news(){
-    let news_jsx = []
-    for(let i=this.state.n_news-1;i>=0;i--){
-      let newsObj = this.state.news_objects[i]
-      let newsDesc = newsObj.desc;
-      let details = newsDesc.split(";")
-      let title = details[0]
-      let content = details[1]
-      let category = details[2]
-      let newsOpts = newsObj.options.split(";");
-      let opt1 = newsOpts[0]
-      let opt2 = newsOpts[1]
-      let allowedGroup = newsObj.groupId;
-      let newsBlock = getNewsBlock(title, content, i, category, opt1, opt2)
-      news_jsx.push(newsBlock)
-    }
-    return(
-      <div id="news">
-      <h2> News List </h2>
-      {news_jsx}
-    </div>
-    )
-  }
-
-  async update_news(user_addr){
-    let n_news = await this.contractManager.getTopicCount()
-    let news_list = []
-    for(let i=n_news;i>=1;i--){
-      let canView = await this.contractManager.permissionCheck(i)
-      if(canView === 0){
-        let news = await this.contractManager.getTopic(i, true)
-        console.log(news)
-        news_list.push(news)
-      }
-    }
-    return {
-      n_news: news_list.length,
-      news_list: news_list,
-    }
-  }
-
   render() {
     var login_state = this.login_state
-    if (!login_state.logined) {
+    if (!login_state.installed) {
       return (
         <div>
           {installMetaMask()}
+        </div>
+      )
+    }
+    if (!login_state.logined) {
+      return (
+        <div>
+          {pleaseLogin()}
         </div>
       )
     }
@@ -179,7 +150,7 @@ class App extends React.Component {
       return (
         <div>
           <UserControl addr={login_state.addr} set_global_ui={this.set_global_ui} cm={this.contractManager}></UserControl>
-          {this.list_news()}
+          <NewsList addr={login_state.addr} cm={this.contractManager}> </NewsList>
         </div>
       );
     } else if(this.state.ui === 1){
