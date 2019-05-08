@@ -28,10 +28,11 @@ class UserControl extends React.Component {
         // decrepted!
         // todo: call apply rewards
         // todo: tell user rewards will be added after a while
-        this.setState({token: 2.0})
+        // this.setState({token: 2.0})
         console.log("apply_rewards")
         console.log(this.contractManager.addOpenTopic)
-        this.contractManager.getTopic(1, false)
+        window.cm = this.contractManager
+        // this.contractManager.getTopic(1, false)
     }
 
     async test_button(){

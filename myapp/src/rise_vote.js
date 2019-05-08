@@ -33,7 +33,7 @@ class RiseVotePage extends React.Component {
         let rate = parseInt(target.elements.rate.value)
         let opt1 = target.elements.option_1.value
         let opt2 = target.elements.option_2.value
-        let expireSec = parseInt(target.elements.expire.value) * 3600 * 24
+        let expireSec = parseInt(target.elements.expire.value) * 60
         
         // compute submit queries
         let description = title + ";" + detail + ";" + category
@@ -91,7 +91,7 @@ class RiseVotePage extends React.Component {
                     <Form.Control type="text" placeholder="" />
                 </Form.Group>
                 <Form.Group controlId="expire">
-                    <Form.Label> Expire Days: </Form.Label>
+                    <Form.Label> Expire Minute: </Form.Label>
                     <Form.Control type="text" placeholder="" />
                 </Form.Group>
                 <Form.Group controlId="groups-risevote">

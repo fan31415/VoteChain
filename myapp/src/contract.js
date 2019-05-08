@@ -31,7 +31,7 @@ class ContractManager{
     }
     payoff(topicId){
         this.vc.deployed().then(function(instance){
-            return instance.vote(topicId);
+            return instance.payoff(topicId);
         })
     }
     // call of vc
